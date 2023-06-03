@@ -13,9 +13,9 @@ class nre():
 
         self.optimizer = tf.keras.optimizers.legacy.Adam(lr=1e-3)
 
-    def basic_model(
+    def build_model(
             self, input_dim, output_dim, layer_sizes, activation,
-            drop_val, output_activation):
+            drop_val=0, output_activation='sigmoid'):
         
         a0 = self.Inputs(shape=(input_dim,))
         inputs = a0
@@ -25,29 +25,36 @@ class nre():
             a0 = outputs
         outputs = self.Dense(output_dim, activation=output_activation)(a0)
         self.model = self.Model(inputs, outputs)
+    
+    def build_simulations(self, simulation_func, prior_function, n=10000):
 
-    def _train_step(self, params, truth):
+        # generate lots of simulations 
+        sims, params = [], []
+        for i in range(n):
+            theta = prior_function()
+            sims.append(simulation_func(theta[0], theta[1]))
+            params.append(theta)
+        sims = np.array(sims)
+        params = np.array(params)
 
-            r"""
-            This function is used to calculate the loss value at each epoch and
-            adjust the weights and biases of the neural networks via the
-            optimizer algorithm.
-            """
+        idx = np.arange(0, len(sims), 1)
+        shuffle(idx)
+        mis_labeled_params = params[idx]
 
-            with tf.GradientTape() as tape:
-                prediction = tf.transpose(self.model(params, training=True))[0]
-                truth = tf.convert_to_tensor(truth)
-                loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)(truth, prediction)
-                gradients = tape.gradient(loss, self.model.trainable_variables)
-                self.optimizer.apply_gradients(
-                    zip(gradients,
-                        self.model.trainable_variables))
-                return loss
+        data = []
+        for i in range(len(sims)):
+            data.append([*sims[i], *params[i], 1])
+            data.append([*sims[i], *mis_labeled_params[i], 0])
+        data = np.array(data)
 
-    def training(self, epochs, data, labels, early_stop, batch_size=32):
+        shuffle(idx)
+        self.data = data[idx, :-1]
+        self.labels = data[idx, -1]
+
+    def training(self, epochs, early_stop=True, batch_size=32):
 
         data_train, data_test, labels_train, labels_test = \
-                train_test_split(data, labels, test_size=0.2)
+                train_test_split(self.data, self.labels, test_size=0.2)
         
         train_dataset = np.hstack([data_train, labels_train[:, np.newaxis]]).astype(np.float32)
         train_dataset = tf.data.Dataset.from_tensor_slices(train_dataset)
@@ -90,3 +97,21 @@ class nre():
                                 '. Minimum at epoch = ' + str(minimum_epoch))
                         return minimum_model, data_test, labels_test
         return self.model, data_test, labels_test
+
+    def _train_step(self, params, truth):
+
+            r"""
+            This function is used to calculate the loss value at each epoch and
+            adjust the weights and biases of the neural networks via the
+            optimizer algorithm.
+            """
+
+            with tf.GradientTape() as tape:
+                prediction = tf.transpose(self.model(params, training=True))[0]
+                truth = tf.convert_to_tensor(truth)
+                loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)(truth, prediction)
+                gradients = tape.gradient(loss, self.model.trainable_variables)
+                self.optimizer.apply_gradients(
+                    zip(gradients,
+                        self.model.trainable_variables))
+                return loss
