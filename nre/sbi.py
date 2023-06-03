@@ -123,14 +123,18 @@ class nre():
         """Draw samples from the nre"""
 
         samples = []
-        posterior_value = []
-        r_values = []
         for i in range(iters):
             samples.append(self.prior_function())
-            params = tf.convert_to_tensor(np.array([[*true_y, *samples[-1]]]).astype('float32'))
+        self.samples = np.array(samples)
+
+        prior_probability = prior_prob(samples)
+
+        posterior_value = []
+        r_values = []
+        for i in range(len(prior_probability)):
+            params = tf.convert_to_tensor(np.array([[*true_y, *samples[i]]]).astype('float32'))
             r = self.model(params).numpy()[0]
             r_values.append(r)
-            posterior_value.append(r*prior_prob(params))
-        self.samples = np.array(samples)
+            posterior_value.append(r*prior_probability[i])
         self.posterior_value = np.array(posterior_value).T[0]
         self.r_values = np.array(r_values).T[0]
