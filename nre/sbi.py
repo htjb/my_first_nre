@@ -31,12 +31,13 @@ class nre():
         self.simulation_func = simulation_func
         self.prior_function = prior_function
 
+        theta = self.prior_function(n)
+
         # generate lots of simulations 
         sims, params = [], []
-        for i in range(n):
-            theta = self.prior_function()
-            sims.append(self.simulation_func(*theta))
-            params.append(theta)
+        for i in range(len(theta)):
+            sims.append(self.simulation_func(*theta[i]))
+            params.append(theta[i])
         sims = np.array(sims)
         params = np.array(params)
 
@@ -122,17 +123,14 @@ class nre():
     def __call__(self, true_y, prior_prob, iters=2000):
         """Draw samples from the nre"""
 
-        samples = []
-        for i in range(iters):
-            samples.append(self.prior_function())
-        self.samples = np.array(samples)
+        self.samples = self.prior_function(iters)
 
-        prior_probability = prior_prob(samples)
+        prior_probability = prior_prob(self.samples)
 
         posterior_value = []
         r_values = []
         for i in range(len(prior_probability)):
-            params = tf.convert_to_tensor(np.array([[*true_y, *samples[i]]]).astype('float32'))
+            params = tf.convert_to_tensor(np.array([[*true_y, *self.samples[i]]]).astype('float32'))
             r = self.model(params).numpy()[0]
             r_values.append(r)
             posterior_value.append(r*prior_probability[i])
