@@ -35,7 +35,7 @@ class nre():
         sims, params = [], []
         for i in range(n):
             theta = self.prior_function()
-            sims.append(self.simulation_func(theta[0], theta[1]))
+            sims.append(self.simulation_func(*theta))
             params.append(theta)
         sims = np.array(sims)
         params = np.array(params)
