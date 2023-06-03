@@ -37,7 +37,8 @@ model, data_test, labels_test = nrei.training(2000, batch_size=50)
 model.save('testing.h5')
 
 # analytic prior probability to get posterior probability
-prior_prob = 1/10*1/10*1/5
+def prior_prob(params):
+    return 1/10*1/10*1/5
 
 # generate samples from the nre and calculate their posterior probability
 nrei(true_y, prior_prob)
