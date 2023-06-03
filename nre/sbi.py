@@ -124,11 +124,13 @@ class nre():
 
         samples = []
         posterior_value = []
+        r_values = []
         for i in range(iters):
             samples.append(self.prior_function())
             params = tf.convert_to_tensor(np.array([[*true_y, *samples[-1]]]).astype('float32'))
-            r = self.model(params)
+            r = self.model(params).numpy()[0]
+            r_values.append(r)
             posterior_value.append(np.exp(r)*prior_prob)
         self.samples = np.array(samples)
-        self.posterior_value = np.array(posterior_value)
-        
+        self.posterior_value = np.array(posterior_value).T[0]
+        self.r_values = np.array(r_values).T[0]

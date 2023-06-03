@@ -38,13 +38,18 @@ prior_prob = 1/10*1/10
 
 # generate samples from the nre and calculate their posterior probability
 nrei(true_y, prior_prob)
+print(nrei.samples, nrei.posterior_value)
+from anesthetic import MCMCSamples
 
-# plot the results
-im = plt.scatter(nrei.samples[:, 0], nrei.samples[:, 1], cmap='inferno', c=nrei.posterior_value)
+samples = MCMCSamples(nrei.samples, weights=(nrei.r_values/np.sum(nrei.r_values)))
+samples.plot_2d([i for i in range(len(true_params))])
+plt.show()
+
+"""im = plt.scatter(nrei.samples[:, 0], nrei.samples[:, 1], cmap='inferno', c=nrei.posterior_value)
 plt.colorbar(im, label='Posterior Prob.')
 plt.axvline(true_params[0])
 plt.axhline(true_params[1])
 plt.xlabel('a')
 plt.ylabel('b')
 #plt.savefig('nre_example_test.png')
-plt.show()
+plt.show()"""
