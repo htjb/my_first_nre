@@ -28,11 +28,14 @@ class nre():
     
     def build_simulations(self, simulation_func, prior_function, n=10000):
 
+        self.simulation_func = simulation_func
+        self.prior_function = prior_function
+
         # generate lots of simulations 
         sims, params = [], []
         for i in range(n):
-            theta = prior_function()
-            sims.append(simulation_func(theta[0], theta[1]))
+            theta = self.prior_function()
+            sims.append(self.simulation_func(theta[0], theta[1]))
             params.append(theta)
         sims = np.array(sims)
         params = np.array(params)
@@ -115,3 +118,17 @@ class nre():
                     zip(gradients,
                         self.model.trainable_variables))
                 return loss
+    
+    def __call__(self, true_y, prior_prob, iters=2000):
+        """Draw samples from the nre"""
+
+        samples = []
+        posterior_value = []
+        for i in range(iters):
+            samples.append(self.prior_function())
+            params = tf.convert_to_tensor(np.array([[*true_y, *samples[-1]]]).astype('float32'))
+            r = self.model(params)
+            posterior_value.append(np.exp(r)*prior_prob)
+        self.samples = np.array(samples)
+        self.posterior_value = np.array(posterior_value)
+        
