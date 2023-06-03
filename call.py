@@ -32,7 +32,7 @@ nrei.build_simulations(simulation, prior)
 # build the neural network
 nrei.build_model(len(true_y)+nparams, 1, 3*[2*(len(true_y)+nparams)], 'sigmoid')
 # train the neural network
-model, data_test, labels_test = nrei.training(2000, batch_size=50)
+model, data_test, labels_test = nrei.training(200, batch_size=50)
 # save teh model
 model.save('testing.h5')
 

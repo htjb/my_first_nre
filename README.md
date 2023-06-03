@@ -13,3 +13,5 @@ Need to read some papers on this probably but good fun none the less.
 Currently the network takes in the data directly but typically
 there is a compression step before its handed to the network. Need to look into
 this.
+
+Not confident I'm treating the output of the classifier correctly.
