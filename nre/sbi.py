@@ -36,7 +36,7 @@ class nre():
         # generate lots of simulations 
         sims, params = [], []
         for i in range(len(theta)):
-            sims.append(self.simulation_func(*theta[i]))
+            sims.append(self.simulation_func(theta[i]))
             params.append(theta[i])
         sims = np.array(sims)
         params = np.array(params)
@@ -126,6 +126,7 @@ class nre():
         self.samples = self.prior_function(iters)
 
         prior_probability = prior_prob(self.samples)
+        print(prior_probability)
 
         posterior_value = []
         r_values = []

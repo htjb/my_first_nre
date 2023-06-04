@@ -6,24 +6,23 @@ import matplotlib.pyplot as plt
 
 # define the real toy data
 x = np.linspace(10, 20, 10)
-true_a, true_b, true_n = 5, 2, 2
-true_params = [true_a, true_b, true_n]
-true_y = true_a*x + true_b + np.random.normal(0, true_n, len(x))
+true_a, true_b = 5, 2
+true_params = [true_a, true_b]
+true_y = true_a*x + true_b + np.random.normal(0, 2, len(x))
 
 # save the real toy data
 np.savetxt('true_y.txt', true_y)
 np.savetxt('true_params.txt', [true_a, true_b])
 
 # define the simulation function and the prior function
-def simulation(a, b, n):
-    return a*x + b + np.random.normal(0, n, len(x))
-def prior():
-    a = np.random.uniform(0, 10)
-    b = np.random.uniform(0, 10)
-    n = np.random.uniform(0, 5)
-    return [a, b, n]
+def simulation(params):
+    return params[0]*x + params[1]
+def prior(n):
+    a = np.random.uniform(0, 10, (1, n))
+    b = np.random.uniform(0, 10, (1, n))
+    return np.vstack([a, b]).T
 
-nparams = 3
+nparams = 2
 
 # initialise the nre
 nrei = nre()
@@ -38,7 +37,7 @@ model.save('testing.h5')
 
 # analytic prior probability to get posterior probability
 def prior_prob(params):
-    return 1/10*1/10*1/5
+    return [1/10*1/10*1/5 for i in range(len(params))]
 
 # generate samples from the nre and calculate their posterior probability
 nrei(true_y, prior_prob)
