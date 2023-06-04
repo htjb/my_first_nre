@@ -126,7 +126,6 @@ class nre():
         self.samples = self.prior_function(iters)
 
         prior_probability = prior_prob(self.samples)
-        print(prior_probability)
 
         posterior_value = []
         r_values = []
