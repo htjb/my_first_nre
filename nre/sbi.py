@@ -137,6 +137,9 @@ class nre():
         r_values = []
         for i in range(len(prior_probability)):
             params = tf.convert_to_tensor(np.array([[*true_y, *self.samples[i]]]).astype('float32'))
+
+            params = (params - self.data_averages)/self.data_std
+
             r = self.model(params).numpy()[0]
             r_values.append(r)
             posterior_value.append(r*prior_probability[i])
