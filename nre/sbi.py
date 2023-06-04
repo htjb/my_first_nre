@@ -53,6 +53,12 @@ class nre():
 
         shuffle(idx)
         self.data = data[idx, :-1]
+
+        self.data_averages = np.mean(self.data, axis=0)
+        self.data_std = np.std(self.data, axis=0)
+
+        self.data = (self.data-self.data_averages)/self.data_std
+
         self.labels = data[idx, -1]
 
     def training(self, epochs, early_stop=True, batch_size=32):
